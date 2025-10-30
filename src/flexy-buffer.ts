@@ -124,63 +124,67 @@ export class FlexyBuffer extends BufferReader {
 
   writeUInt8(n: number): number {
     this._ensureSize(1);
-    const actual = this.buffer.writeUInt8(n, this._position);
+    const actual = this.buffer.writeUInt8(n, this._position) - this._position;
     this._position += actual;
     return actual;
   }
 
   writeInt16BE(n: number): number {
     this._ensureSize(2);
-    const actual = this.buffer.writeInt16BE(n, this._position);
+    const actual = this.buffer.writeInt16BE(n, this._position) - this._position;
     this._position += actual;
     return actual;
   }
 
   writeUInt16BE(n: number): number {
     this._ensureSize(2);
-    const actual = this.buffer.writeUInt16BE(n, this._position);
+    const actual =
+      this.buffer.writeUInt16BE(n, this._position) - this._position;
     this._position += actual;
     return actual;
   }
 
   writeInt16LE(n: number): number {
     this._ensureSize(2);
-    const actual = this.buffer.writeInt16LE(n, this._position);
+    const actual = this.buffer.writeInt16LE(n, this._position) - this._position;
     this._position += actual;
     return actual;
   }
 
   writeUInt16LE(n: number): number {
     this._ensureSize(2);
-    const actual = this.buffer.writeUInt16LE(n, this._position);
+    const actual =
+      this.buffer.writeUInt16LE(n, this._position) - this._position;
     this._position += actual;
     return actual;
   }
 
   writeInt32BE(n: number): number {
     this._ensureSize(4);
-    const actual = this.buffer.writeInt32BE(n, this._position);
+    const actual = this.buffer.writeInt32BE(n, this._position) - this._position;
     this._position += actual;
     return actual;
   }
 
   writeUInt32BE(n: number): number {
     this._ensureSize(4);
-    const actual = this.buffer.writeUInt32BE(n, this._position);
+    const actual =
+      this.buffer.writeUInt32BE(n, this._position) - this._position;
     this._position += actual;
     return actual;
   }
 
   writeInt32LE(n: number): number {
     this._ensureSize(4);
-    const actual = this.buffer.writeInt32LE(n, this._position);
+    const actual = this.buffer.writeInt32LE(n, this._position) - this._position;
     this._position += actual;
     return actual;
   }
 
   writeUInt32LE(n: number): number {
     this._ensureSize(4);
-    const actual = this.buffer.writeUInt32LE(n, this._position);
+    const actual =
+      this.buffer.writeUInt32LE(n, this._position) - this._position;
     this._position += actual;
     return actual;
   }
@@ -188,7 +192,8 @@ export class FlexyBuffer extends BufferReader {
   writeBigInt64BE(n: bigint | number): number {
     n = typeof n === 'bigint' ? n : BigInt(n);
     this._ensureSize(8);
-    const actual = this.buffer.writeBigInt64BE(n, this._position);
+    const actual =
+      this.buffer.writeBigInt64BE(n, this._position) - this._position;
     this._position += actual;
     return actual;
   }
@@ -196,7 +201,8 @@ export class FlexyBuffer extends BufferReader {
   writeBigUInt64BE(n: bigint | number): number {
     n = typeof n === 'bigint' ? n : BigInt(n);
     this._ensureSize(8);
-    const actual = this.buffer.writeBigUInt64BE(n, this._position);
+    const actual =
+      this.buffer.writeBigUInt64BE(n, this._position) - this._position;
     this._position += actual;
     return actual;
   }
@@ -204,7 +210,8 @@ export class FlexyBuffer extends BufferReader {
   writeBigInt64LE(n: bigint | number): number {
     n = typeof n === 'bigint' ? n : BigInt(n);
     this._ensureSize(8);
-    const actual = this.buffer.writeBigInt64LE(n, this._position);
+    const actual =
+      this.buffer.writeBigInt64LE(n, this._position) - this._position;
     this._position += actual;
     return actual;
   }
@@ -212,35 +219,38 @@ export class FlexyBuffer extends BufferReader {
   writeBigUInt64LE(n: bigint | number): number {
     n = typeof n === 'bigint' ? n : BigInt(n);
     this._ensureSize(8);
-    const actual = this.buffer.writeBigUInt64LE(n, this._position);
+    const actual =
+      this.buffer.writeBigUInt64LE(n, this._position) - this._position;
     this._position += actual;
     return actual;
   }
 
   writeFloatBE(n: number): number {
     this._ensureSize(4);
-    const actual = this.buffer.writeFloatBE(n, this._position);
+    const actual = this.buffer.writeFloatBE(n, this._position) - this._position;
     this._position += actual;
     return actual;
   }
 
   writeFloatLE(n: number): number {
     this._ensureSize(4);
-    const actual = this.buffer.writeFloatLE(n, this._position);
+    const actual = this.buffer.writeFloatLE(n, this._position) - this._position;
     this._position += actual;
     return actual;
   }
 
   writeDoubleBE(n: number): number {
     this._ensureSize(8);
-    const actual = this.buffer.writeDoubleBE(n, this._position);
+    const actual =
+      this.buffer.writeDoubleBE(n, this._position) - this._position;
     this._position += actual;
     return actual;
   }
 
   writeDoubleLE(n: number): number {
     this._ensureSize(8);
-    const actual = this.buffer.writeDoubleLE(n, this._position);
+    const actual =
+      this.buffer.writeDoubleLE(n, this._position) - this._position;
     this._position += actual;
     return actual;
   }
@@ -258,7 +268,8 @@ export class FlexyBuffer extends BufferReader {
     if (str) {
       const len = Buffer.byteLength(str, encoding);
       this._ensureSize(len);
-      const actual = this.buffer.write(str, this._position, encoding);
+      const actual =
+        this.buffer.write(str, this._position, encoding) - this._position;
       this._position += actual;
       return actual;
     }
