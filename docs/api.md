@@ -1,10 +1,10 @@
 <!--
 docs-baseline
-git-commit: 861f13612a84d87277115c1918478edda916f542
-package-version: 1.0.0
+git-commit: fbb35ad5f72bd474c8a42479aca6f862a69af50b
+package-version: 1.0.1
 date: 2026-09-12
 verified-against: src/
-diff-command: git diff 861f13612a84d87277115c1918478edda916f542..HEAD -- src/
+diff-command: git diff fbb35ad5f72bd474c8a42479aca6f862a69af50b..HEAD -- src/
 -->
 
 # flexy-buffer API Documentation
@@ -65,7 +65,7 @@ constructor(buffer: Buffer)
 | ---------- | -------- | -------------------------------------------------- |
 | `buffer`   | `Buffer` | The underlying buffer being read from.             |
 | `size`     | `number` | Length of the underlying buffer, in bytes.         |
-| `position` | `number` | Current read position (readonly - use `moveBy`/`moveTo` to change it). |
+| `position` | `number` | Current read position. Settable - assigning to it is equivalent to `moveTo()`, so the value is clamped to `[0, size]`. |
 
 ### Read methods
 
@@ -113,7 +113,8 @@ moveTo(pos: number): this
 
 Move the position by a relative offset (`moveBy`, positive or negative) or
 to an absolute one (`moveTo`). Both clamp the result to `[0, size]` rather
-than throwing, and return `this` for chaining.
+than throwing, and return `this` for chaining. Assigning directly to
+`position` (`buf.position = pos`) is equivalent to `moveTo(pos)`.
 
 ### Errors
 
@@ -225,7 +226,10 @@ flush(copy?: boolean): Buffer
 ```
 
 Returns the valid data (`0` to `size`), then resets the buffer (as `start()`
-does) and (re)schedules the housekeeping timer.
+does). If capacity has grown past its baseline (`minPages` pages), (re)arms
+the housekeeping timer; otherwise there's nothing to reclaim, so it clears
+any pending timer instead - a stream of small messages that never grow the
+buffer doesn't pay for a clearTimeout/setTimeout pair on every flush.
 
 - `copy` (default `true`): if `true`, returns a new `Buffer` copy, safe to
   keep around indefinitely. If `false`, returns a **view** into the internal

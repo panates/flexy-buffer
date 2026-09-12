@@ -167,6 +167,11 @@ export class FlexyBuffer extends BufferReader {
    * only safe if it is consumed before the next write, since reuse
    * overwrites the same memory.
    *
+   * Only (re)arms the housekeeping timer if capacity has actually grown
+   * past its baseline (`minPages` pages) - a buffer that never grew has
+   * nothing to reclaim, so repeated flushes of small messages don't pay
+   * for a clearTimeout/setTimeout pair each time.
+   *
    * @param copy - If true (default), returns a new Buffer copy. If false,
    * returns a view into the internal buffer.
    */
@@ -176,7 +181,12 @@ export class FlexyBuffer extends BufferReader {
       : this.buffer.subarray(0, this.size);
     this._length = 0;
     this._position = 0;
-    this._startHouseKeepTimer(true);
+    if (this.capacity > this.pageSize * this.minPages) {
+      this._startHouseKeepTimer(true);
+    } else if (this._houseKeepTimer) {
+      clearTimeout(this._houseKeepTimer);
+      this._houseKeepTimer = undefined;
+    }
     return out;
   }
 

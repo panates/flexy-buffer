@@ -35,6 +35,17 @@ describe('BufferReader', () => {
     expect(reader.readInt32BE()).toEqual(-1);
   });
 
+  it('should allow setting position directly, clamped to [0, size]', () => {
+    const reader = new BufferReader(Buffer.from([1, 2, 3, 4]));
+    reader.position = 2;
+    expect(reader.position).toEqual(2);
+    expect(reader.readUInt8()).toEqual(3);
+    reader.position = -5;
+    expect(reader.position).toEqual(0);
+    reader.position = 100;
+    expect(reader.position).toEqual(4);
+  });
+
   it('should read a bounded sub-buffer and advance by its length', () => {
     const reader = new BufferReader(Buffer.from([1, 2, 3, 4]));
     const buf = reader.readBytes(2);
