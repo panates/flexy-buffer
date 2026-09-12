@@ -195,6 +195,25 @@ describe('FlexyBuffer', () => {
     }, 20);
   });
 
+  it('should not arm the house keep timer on flush() when capacity never grew', () => {
+    // A buffer that stayed at its baseline capacity has nothing to
+    // reclaim, so flush() shouldn't pay for a clearTimeout/setTimeout pair.
+    const buf = new FlexyBuffer({ pageSize: 100, minPages: 2 });
+    buf.writeBytes([1, 2, 3]);
+    expect(buf.capacity).toEqual(200);
+    buf.flush();
+    expect((buf as any)._houseKeepTimer).toBeUndefined();
+  });
+
+  it('should arm the house keep timer on flush() when capacity did grow', () => {
+    const buf = new FlexyBuffer({ pageSize: 4 });
+    buf.writeInt32BE(1);
+    buf.writeInt32BE(2); // forces growth past one page
+    expect(buf.capacity).toBeGreaterThan(4);
+    buf.flush();
+    expect((buf as any)._houseKeepTimer).toBeDefined();
+  });
+
   it('should write a string at a non-zero position without truncating the advance', () => {
     // Regression: writeString() used to subtract `position` from the byte
     // count Buffer#write() already returns, under-advancing the position

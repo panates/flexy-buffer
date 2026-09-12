@@ -22,10 +22,16 @@ export class BufferReader {
   }
 
   /**
-   * Current read position in the buffer.
+   * Current read position in the buffer. Settable, like SmartBuffer's
+   * `offset` - assigning to it is equivalent to calling `moveTo()`, so the
+   * value is clamped to [0, size] rather than accepted as-is.
    */
   get position(): number {
     return this._position;
+  }
+
+  set position(pos: number) {
+    this.moveTo(pos);
   }
 
   /**
