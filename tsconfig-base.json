@@ -1,9 +1,7 @@
 {
   "extends": "@panates/tsconfig/node.json",
   "compilerOptions": {
-    "types": ["node"],
-    "module": "NodeNext",
-    "moduleResolution": "NodeNext",
-    "esModuleInterop": true
+    "experimentalDecorators": true,
+    "emitDecoratorMetadata": true
   }
 }

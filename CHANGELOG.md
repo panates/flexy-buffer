@@ -1,7 +1,8 @@
 ## Changelog
 
-### [v0.1.2](https://github.com/panates/flexy-buffer/compare/v0.1.1...v0.1.2) - 
+### [v1.0.0](https://github.com/panates/flexy-buffer/compare/v0.1.2...v1.0.0) - 
 
-#### 🪲 Fixes
+#### 💬 General Changes
 
-- fix: Fixed return values @Eray Hanoğlu 
+- Add start()/flush(), byte-exact maxLength, fix writeString bug @Eray Hanoğlu 
+- Move to a single ESM-only build @Eray Hanoğlu 
