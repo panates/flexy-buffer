@@ -5,10 +5,10 @@
 [![CI Tests][ci-test-image]][ci-test-url]
 [![Test Coverage][coveralls-image]][coveralls-url]
 
-A flexible, auto-growing binary buffer for Node.js and the browser. `BufferReader`
-gives you a sequential, typed read cursor over a `Buffer`; `FlexyBuffer` extends it
-with write methods and automatic, page-based capacity management, so you don't have
-to size a buffer up front or manage reallocation yourself.
+A flexible, auto-growing binary buffer for Node.js. `BufferReader` gives you a
+sequential, typed read cursor over a `Buffer`; `FlexyBuffer` extends it with write
+methods and automatic, page-based capacity management, so you don't have to size a
+buffer up front or manage reallocation yourself.
 
 ## 📖 [Full API documentation](docs/api.md)
 
