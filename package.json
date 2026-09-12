@@ -1,7 +1,7 @@
 {
   "name": "flexy-buffer",
   "description": "Flexible buffer for node.js and browser.",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "author": "Panates",
   "license": "MIT",
   "private": true,
