@@ -1,10 +1,10 @@
 <!--
 docs-baseline
-git-commit: 861f13612a84d87277115c1918478edda916f542
-package-version: 1.0.0
+git-commit: fbb35ad5f72bd474c8a42479aca6f862a69af50b
+package-version: 1.0.1
 date: 2026-09-12
 verified-against: src/
-diff-command: git diff 861f13612a84d87277115c1918478edda916f542..HEAD -- src/
+diff-command: git diff fbb35ad5f72bd474c8a42479aca6f862a69af50b..HEAD -- src/
 -->
 
 # flexy-buffer API Documentation
