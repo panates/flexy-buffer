@@ -33,15 +33,12 @@
   },
   "scripts": {
     "compile": "tsc --noEmit",
-    "clean": "npm run clean:src && npm run clean:dist",
-    "clean:dist": "rimraf build coverage",
+    "prebuild": "npm run clean:build && npm run lint",
+    "build": "tsc -b tsconfig-build.json",
+    "postbuild": "node ./support/postbuild.cjs && rimraf build/*.tsbuildinfo",
+    "clean": "npm run clean:src && npm run clean:build",
+    "clean:build": "rimraf build coverage *.tsbuildinfo",
     "clean:src": "ts-cleanup -s src --all | ts-cleanup -s test",
-    "prebuild": "npm run clean:dist && npm run lint",
-    "build": "npm run build:cjs && npm run build:esm",
-    "build:cjs": "tsc -b tsconfig-build-cjs.json && cp support/package.cjs.json ./build/cjs/package.json",
-    "build:esm": "tsc -b tsconfig-build-esm.json && cp support/package.esm.json ./build/esm/package.json",
-    "postbuild": "npm run postbuild:copyfiles && node ./support/postbuild.cjs",
-    "postbuild:copyfiles": "cp LICENSE README.md CHANGELOG.md ./build",
     "lint": "eslint . --max-warnings=0",
     "lint:fix": "eslint . --max-warnings=0 --fix",
     "format": "prettier . --write --log-level=warn",
@@ -50,7 +47,8 @@
     "precitest": "rimraf coverage",
     "citest": "c8 mocha",
     "qc": "npm run lint && npm run check",
-    "version": "auto-changelog -p --starting-version v4.0.0 && git add CHANGELOG.md"
+    "version": "auto-changelog -p --starting-version v4.0.0 && git add CHANGELOG.md",
+    "graph": "graphify update ."
   },
   "type": "module",
   "module": "./index.js",
@@ -67,7 +65,7 @@
   ],
   "repository": {
     "type": "git",
-    "url": "https://github.com/panates/valgen.git"
+    "url": "https://github.com/panates/flexy-buffer.git"
   },
   "engines": {
     "node": ">= 16.0"
