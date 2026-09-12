@@ -1,15 +1,29 @@
+/**
+ * Sequential, forward-only reader over a fixed Buffer.
+ * Tracks a current read position and exposes typed read methods that
+ * advance it, throwing when a read would run past the end of the buffer.
+ */
 export class BufferReader {
   protected _position = 0;
   buffer: Buffer;
 
+  /**
+   * @param buffer - The buffer to read from.
+   */
   constructor(buffer: Buffer) {
     this.buffer = buffer;
   }
 
+  /**
+   * Length of the underlying buffer in bytes.
+   */
   get size(): number {
     return this.buffer.length;
   }
 
+  /**
+   * Current read position in the buffer.
+   */
   get position(): number {
     return this._position;
   }
@@ -194,6 +208,12 @@ export class BufferReader {
     return val;
   }
 
+  /**
+   * Reads and returns a slice of the buffer, advancing the position past it.
+   *
+   * @param len - Number of bytes to read. If omitted, reads through the end
+   * of the buffer.
+   */
   readBytes(len?: number): Buffer {
     if (len) this._checkReadable(len);
     const end = len !== undefined ? this._position + len : this.size;
@@ -202,6 +222,13 @@ export class BufferReader {
     return buf;
   }
 
+  /**
+   * Reads a fixed-length string, advancing the position past it.
+   *
+   * @param len - Number of bytes to read. A negative length reads nothing
+   * and returns an empty string.
+   * @param encoding - Text encoding used to decode the bytes.
+   */
   readString(len: number, encoding?: BufferEncoding): string {
     if (len < 0) return '';
     this._checkReadable(len);
@@ -214,10 +241,20 @@ export class BufferReader {
     return v;
   }
 
+  /**
+   * Moves the position by a relative offset, clamped to [0, size].
+   *
+   * @param n - Number of bytes to move by. Negative values move backward.
+   */
   moveBy(n: number): this {
     return this.moveTo(this._position + n);
   }
 
+  /**
+   * Moves the position to an absolute offset, clamped to [0, size].
+   *
+   * @param pos - Target position.
+   */
   moveTo(pos: number): this {
     if (pos > this.size) pos = this.size;
     if (pos < 0) pos = 0;
@@ -225,6 +262,7 @@ export class BufferReader {
     return this;
   }
 
+  /** Throws if fewer than `size` bytes remain to be read from the current position. */
   private _checkReadable(size: number): void {
     if (this._position + size - 1 >= this.size) {
       const err: any = new Error('Eof in buffer detected');
