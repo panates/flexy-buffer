@@ -5,6 +5,11 @@
  */
 export class BufferReader {
   protected _position = 0;
+  /**
+   * The buffer being read from. Exposed directly so callers can inspect or
+   * patch its bytes directly (e.g. `buffer.writeUInt32BE(...)` to backpatch
+   * a value at an earlier offset) without going through the read cursor.
+   */
   buffer: Buffer;
 
   /**
@@ -30,12 +35,19 @@ export class BufferReader {
     return this._position;
   }
 
+  /**
+   * @param pos - Target position, clamped to [0, size].
+   */
   set position(pos: number) {
     this.moveTo(pos);
   }
 
   /**
-   * Reads a signed 8-bit integer
+   * Reads a signed 8-bit integer.
+   *
+   * @returns The decoded value.
+   * @throws An error with code 'ERR_BUFFER_OUT_OF_BOUNDS' if fewer than 1
+   * byte remains at the current position.
    */
   readInt8(): number {
     this._checkReadable(1);
@@ -45,7 +57,11 @@ export class BufferReader {
   }
 
   /**
-   * Reads an unsigned 8-bit integer
+   * Reads an unsigned 8-bit integer.
+   *
+   * @returns The decoded value.
+   * @throws An error with code 'ERR_BUFFER_OUT_OF_BOUNDS' if fewer than 1
+   * byte remains at the current position.
    */
   readUInt8(): number {
     this._checkReadable(1);
@@ -55,7 +71,11 @@ export class BufferReader {
   }
 
   /**
-   * Reads a signed, big-endian 16-bit integer
+   * Reads a signed, big-endian 16-bit integer.
+   *
+   * @returns The decoded value.
+   * @throws An error with code 'ERR_BUFFER_OUT_OF_BOUNDS' if fewer than 2
+   * bytes remain at the current position.
    */
   readInt16BE(): number {
     this._checkReadable(2);
@@ -65,7 +85,11 @@ export class BufferReader {
   }
 
   /**
-   * Reads an unsigned, big-endian 16-bit integer
+   * Reads an unsigned, big-endian 16-bit integer.
+   *
+   * @returns The decoded value.
+   * @throws An error with code 'ERR_BUFFER_OUT_OF_BOUNDS' if fewer than 2
+   * bytes remain at the current position.
    */
   readUInt16BE(): number {
     this._checkReadable(2);
@@ -75,7 +99,11 @@ export class BufferReader {
   }
 
   /**
-   * Reads a signed, little-endian 16-bit integer
+   * Reads a signed, little-endian 16-bit integer.
+   *
+   * @returns The decoded value.
+   * @throws An error with code 'ERR_BUFFER_OUT_OF_BOUNDS' if fewer than 2
+   * bytes remain at the current position.
    */
   readInt16LE(): number {
     this._checkReadable(2);
@@ -85,7 +113,11 @@ export class BufferReader {
   }
 
   /**
-   * Reads an unsigned, little-endian 16-bit integer
+   * Reads an unsigned, little-endian 16-bit integer.
+   *
+   * @returns The decoded value.
+   * @throws An error with code 'ERR_BUFFER_OUT_OF_BOUNDS' if fewer than 2
+   * bytes remain at the current position.
    */
   readUInt16LE(): number {
     this._checkReadable(2);
@@ -95,7 +127,11 @@ export class BufferReader {
   }
 
   /**
-   * Reads a signed, big-endian 32-bit integer
+   * Reads a signed, big-endian 32-bit integer.
+   *
+   * @returns The decoded value.
+   * @throws An error with code 'ERR_BUFFER_OUT_OF_BOUNDS' if fewer than 4
+   * bytes remain at the current position.
    */
   readInt32BE(): number {
     this._checkReadable(4);
@@ -105,7 +141,11 @@ export class BufferReader {
   }
 
   /**
-   * Reads an unsigned, big-endian 32-bit integer
+   * Reads an unsigned, big-endian 32-bit integer.
+   *
+   * @returns The decoded value.
+   * @throws An error with code 'ERR_BUFFER_OUT_OF_BOUNDS' if fewer than 4
+   * bytes remain at the current position.
    */
   readUInt32BE(): number {
     this._checkReadable(4);
@@ -115,7 +155,11 @@ export class BufferReader {
   }
 
   /**
-   * Reads a signed, little-endian 32-bit integer
+   * Reads a signed, little-endian 32-bit integer.
+   *
+   * @returns The decoded value.
+   * @throws An error with code 'ERR_BUFFER_OUT_OF_BOUNDS' if fewer than 4
+   * bytes remain at the current position.
    */
   readInt32LE(): number {
     this._checkReadable(4);
@@ -125,7 +169,11 @@ export class BufferReader {
   }
 
   /**
-   * Reads an unsigned, little-endian 32-bit integer
+   * Reads an unsigned, little-endian 32-bit integer.
+   *
+   * @returns The decoded value.
+   * @throws An error with code 'ERR_BUFFER_OUT_OF_BOUNDS' if fewer than 4
+   * bytes remain at the current position.
    */
   readUInt32LE(): number {
     this._checkReadable(4);
@@ -135,7 +183,11 @@ export class BufferReader {
   }
 
   /**
-   * Reads a signed, big-endian 64-bit integer
+   * Reads a signed, big-endian 64-bit integer.
+   *
+   * @returns The decoded value.
+   * @throws An error with code 'ERR_BUFFER_OUT_OF_BOUNDS' if fewer than 8
+   * bytes remain at the current position.
    */
   readBigInt64BE(): BigInt {
     this._checkReadable(8);
@@ -145,7 +197,11 @@ export class BufferReader {
   }
 
   /**
-   * Reads an unsigned, big-endian 64-bit integer
+   * Reads an unsigned, big-endian 64-bit integer.
+   *
+   * @returns The decoded value.
+   * @throws An error with code 'ERR_BUFFER_OUT_OF_BOUNDS' if fewer than 8
+   * bytes remain at the current position.
    */
   readBigUInt64BE(): BigInt {
     this._checkReadable(8);
@@ -155,7 +211,11 @@ export class BufferReader {
   }
 
   /**
-   * Reads a signed, little-endian 64-bit integer
+   * Reads a signed, little-endian 64-bit integer.
+   *
+   * @returns The decoded value.
+   * @throws An error with code 'ERR_BUFFER_OUT_OF_BOUNDS' if fewer than 8
+   * bytes remain at the current position.
    */
   readBigInt64LE(): BigInt {
     this._checkReadable(8);
@@ -165,7 +225,11 @@ export class BufferReader {
   }
 
   /**
-   * Reads an unsigned, little-endian 64-bit integer
+   * Reads an unsigned, little-endian 64-bit integer.
+   *
+   * @returns The decoded value.
+   * @throws An error with code 'ERR_BUFFER_OUT_OF_BOUNDS' if fewer than 8
+   * bytes remain at the current position.
    */
   readBigUInt64LE(): BigInt {
     this._checkReadable(8);
@@ -175,7 +239,11 @@ export class BufferReader {
   }
 
   /**
-   * Reads a 32-bit, big-endian float
+   * Reads a 32-bit, big-endian float.
+   *
+   * @returns The decoded value.
+   * @throws An error with code 'ERR_BUFFER_OUT_OF_BOUNDS' if fewer than 4
+   * bytes remain at the current position.
    */
   readFloatBE(): number {
     this._checkReadable(4);
@@ -185,7 +253,11 @@ export class BufferReader {
   }
 
   /**
-   * Reads a 32-bit, little-endian float
+   * Reads a 32-bit, little-endian float.
+   *
+   * @returns The decoded value.
+   * @throws An error with code 'ERR_BUFFER_OUT_OF_BOUNDS' if fewer than 4
+   * bytes remain at the current position.
    */
   readFloatLE(): number {
     this._checkReadable(4);
@@ -195,7 +267,11 @@ export class BufferReader {
   }
 
   /**
-   * Reads a 64-bit, little-endian double
+   * Reads a 64-bit, big-endian double.
+   *
+   * @returns The decoded value.
+   * @throws An error with code 'ERR_BUFFER_OUT_OF_BOUNDS' if fewer than 8
+   * bytes remain at the current position.
    */
   readDoubleBE(): number {
     this._checkReadable(8);
@@ -205,7 +281,11 @@ export class BufferReader {
   }
 
   /**
-   * Reads a 64-bit, big-endian double
+   * Reads a 64-bit, little-endian double.
+   *
+   * @returns The decoded value.
+   * @throws An error with code 'ERR_BUFFER_OUT_OF_BOUNDS' if fewer than 8
+   * bytes remain at the current position.
    */
   readDoubleLE(): number {
     this._checkReadable(8);
@@ -219,6 +299,9 @@ export class BufferReader {
    *
    * @param len - Number of bytes to read. If omitted, reads through the end
    * of the buffer.
+   * @returns A `Buffer` view over the read bytes (not a copy).
+   * @throws An error with code 'ERR_BUFFER_OUT_OF_BOUNDS' if `len` is given
+   * and that many bytes aren't available.
    */
   readBytes(len?: number): Buffer {
     if (len) this._checkReadable(len);
@@ -234,6 +317,9 @@ export class BufferReader {
    * @param len - Number of bytes to read. A negative length reads nothing
    * and returns an empty string.
    * @param encoding - Text encoding used to decode the bytes.
+   * @returns The decoded string.
+   * @throws An error with code 'ERR_BUFFER_OUT_OF_BOUNDS' if `len` is
+   * non-negative and that many bytes aren't available.
    */
   readString(len: number, encoding?: BufferEncoding): string {
     if (len < 0) return '';

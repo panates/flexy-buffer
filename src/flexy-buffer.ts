@@ -57,6 +57,9 @@ export class FlexyBuffer extends BufferReader {
     return this._houseKeepMs;
   }
 
+  /**
+   * @param value - New idle interval in milliseconds.
+   */
   set houseKeepMs(value: number) {
     this._houseKeepMs = value;
     if (this._houseKeepTimer) this._startHouseKeepTimer();
@@ -210,7 +213,8 @@ export class FlexyBuffer extends BufferReader {
    * the inserted bytes.
    *
    * @param buffer - Bytes to insert.
-   * @returns The number of bytes the buffer grew by to make room.
+   * @returns The number of bytes inserted (always `buffer.length`; `size`
+   * grows by the same amount).
    */
   insertBytes(buffer: Buffer | number[]): number {
     const actual = buffer.length - Math.min(this.size - this._position, 0);
