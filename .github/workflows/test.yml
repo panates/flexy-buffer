@@ -1,8 +1,8 @@
 name: Test
 on:
+  # No secrets: every dependency here answers from the public registry unauthenticated and the
+  # repository has no .npmrc, so PERSONAL_ACCESS_TOKEN was authenticating nothing.
   workflow_call:
-    secrets:
-      PERSONAL_ACCESS_TOKEN:
 
   # Can be run manually
   workflow_dispatch:
@@ -12,49 +12,48 @@ on:
     branches:
       - dev
 
+# This workflow only ever reads the repository.
+permissions:
+  contents: read
+
 # Only one run per branch at a time
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
-  # ***********************************
-  # Job: Test
-  # ***********************************
   test:
-    name: 'Tests'
-    if: >
-      github.event_name == 'workflow_dispatch' ||
-      (
-        github.event_name == 'push' &&
-        !(
-          contains(github.event.head_commit.message, 'no-test') ||
-          ( 
-            startsWith(github.event.head_commit.message, 'Merge pull request') &&
-            contains(github.event.head_commit.message, '/dev')
-          )
-        )
-      )
-    runs-on: ubuntu-latest
-    timeout-minutes: 15
+    name: Node v${{ matrix.node }}
     strategy:
       fail-fast: false
       matrix:
         node: [ '22', '23', '24' ]
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
     env:
       TZ: Europe/Istanbul  # Set timezone for entire job
-
     steps:
+      # `@v2` checks the repository out itself, installs exactly what the lockfile pins
+      # (`install: 'ci'`) and puts the rman major on the PATH.
       - name: Setup Environment
-        uses: panates/gh-setup-node@v1
+        uses: panates/gh-setup-node@v2
         with:
-          token: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
           node-version: ${{ matrix.node }}
+          rman-version: '2'
+          install: 'ci'
 
-      - name: Apply tests
-        run: |
-          npm run qc
-          npm run citest
+      # The preset's own commands rather than npm scripts, so their flags are pinned in one place.
+      - name: Run linter test
+        run: rman lint
+
+      - name: Run circular dependency test
+        run: rman check
+
+      - name: Run type check
+        run: npm run compile
+
+      - name: Run unit tests
+        run: npm run citest
         env:
           NODE_OPTIONS: "--max_old_space_size=4096 --no-experimental-strip-types"
 
