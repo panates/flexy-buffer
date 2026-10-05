@@ -1,6 +1,20 @@
 # Changelog
 
-<!-- rman:documented-up-to 1297e2a85def8a193e9cab26d9e8959ed24ef8bc -->
+<!-- rman:documented-up-to 774b2a2d91e5368fd9c969df1a2ef7626575ad77 -->
+
+## v1.1.2 (2026-10-05)
+
+### 🧹 Chores
+
+- migrate to rman 2.x and the shared GitHub Actions workflows (b9dff0a)
+- rebuild the changelog with rman, test on Node 22/24/26, drop husky and .madgerc (d33aac3)
+
+### 💬 General Changes
+
+- Arm one house keep timer per idle window, not one per flush (a01b19a)
+- Bump docs/api.md baseline to the commit it now describes (f1dddc3)
+
+---
 
 ## v1.1.1 (2026-09-13)
 
