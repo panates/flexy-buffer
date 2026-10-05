@@ -110,13 +110,117 @@ describe('FlexyBuffer', () => {
     expect(buf.size).toEqual(1);
   });
 
-  it('should start() reset position, size and pending house keep timer', () => {
+  it('should start() reset position and size', () => {
     const buf = new FlexyBuffer({ pageSize: 100, houseKeepMs: 10 });
     buf.writeBytes([1, 2, 3]);
     buf.growSize(150);
     buf.start();
     expect(buf.size).toEqual(0);
     expect(buf.position).toEqual(0);
+  });
+
+  it('should arm no more house keep timers while the buffer stays in use', () => {
+    // Regression: start() used to cancel the pending timer outright, so the
+    // "one is already armed" guard could never fire and every
+    // start/write/flush cycle allocated a fresh Timeout - two of them once
+    // capacity had grown, because flush() re-armed as well. Counted rather
+    // than reasoned about: the cost was one object per framed message, which
+    // is per query for a wire protocol built on this.
+    const buf = new FlexyBuffer({ pageSize: 4, houseKeepMs: 100000 });
+    buf.writeInt32BE(1);
+    buf.writeInt32BE(2); // grow past one page, which arms the timer
+    buf.flush();
+    expect((buf as any)._houseKeepTimer).toBeDefined();
+
+    const real = globalThis.setTimeout;
+    let armed = 0;
+    (globalThis as any).setTimeout = (...args: any[]) => {
+      armed++;
+      return (real as any)(...args);
+    };
+    try {
+      for (let i = 0; i < 100; i++) {
+        buf.start();
+        buf.writeInt32BE(i);
+        buf.writeInt32BE(i);
+        buf.flush();
+      }
+    } finally {
+      globalThis.setTimeout = real;
+    }
+    expect(armed).toEqual(0);
+  });
+
+  it('should arm nothing at all for a buffer that never grows', () => {
+    const buf = new FlexyBuffer({ pageSize: 100, houseKeepMs: 100000 });
+    const real = globalThis.setTimeout;
+    let armed = 0;
+    (globalThis as any).setTimeout = (...args: any[]) => {
+      armed++;
+      return (real as any)(...args);
+    };
+    try {
+      for (let i = 0; i < 100; i++) {
+        buf.start();
+        buf.writeBytes([1, 2, 3]);
+        buf.flush();
+      }
+    } finally {
+      globalThis.setTimeout = real;
+    }
+    expect(armed).toEqual(0);
+    expect((buf as any)._houseKeepTimer).toBeUndefined();
+  });
+
+  it('should re-arm rather than reclaim when the buffer was touched again', done => {
+    // The armed timer wakes at 50ms, finds the deadline has moved to ~80ms
+    // because of the start() at 30ms, and waits again instead of shrinking.
+    const buf = new FlexyBuffer({ pageSize: 100, houseKeepMs: 50 });
+    buf.growSize(150);
+    expect(buf.capacity).toEqual(200);
+    setTimeout(() => buf.start(), 30);
+    setTimeout(() => {
+      if (buf.capacity !== 200) done(new Error('reclaimed inside the window'));
+    }, 65);
+    setTimeout(() => {
+      try {
+        expect(buf.capacity).toEqual(100);
+        done();
+      } catch (e) {
+        done(e);
+      }
+    }, 120);
+  });
+
+  it('should still reclaim capacity when start() leaves the buffer idle', done => {
+    // start() used to cancel the timer and arm nothing in its place, so a
+    // buffer started and then abandoned kept its grown capacity for good.
+    const buf = new FlexyBuffer({ pageSize: 100, houseKeepMs: 10 });
+    buf.growSize(150);
+    buf.start();
+    setTimeout(() => {
+      try {
+        expect(buf.capacity).toEqual(100);
+        done();
+      } catch (e) {
+        done(e);
+      }
+    }, 40);
+  });
+
+  it('should re-arm a pending timer when houseKeepMs is shortened', done => {
+    const buf = new FlexyBuffer({ pageSize: 100, houseKeepMs: 100000 });
+    buf.growSize(150);
+    expect(buf.capacity).toEqual(200);
+    buf.houseKeepMs = 10;
+    setTimeout(() => {
+      try {
+        expect(buf.capacity).toEqual(100);
+        done();
+      } catch (e) {
+        done(e);
+      }
+    }, 40);
   });
 
   it('should flush() return a copy and reset the buffer', () => {

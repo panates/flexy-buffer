@@ -1,10 +1,10 @@
 <!--
 docs-baseline
-git-commit: 16eea5dc89da3b232e0af14fabb15b550c35893b
-package-version: 1.1.0
-date: 2026-09-13
+git-commit: a01b19a0e174de3f2432728d837f5284b031e084
+package-version: 1.1.1
+date: 2026-10-05
 verified-against: src/
-diff-command: git diff 16eea5dc89da3b232e0af14fabb15b550c35893b..HEAD -- src/
+diff-command: git diff a01b19a0e174de3f2432728d837f5284b031e084..HEAD -- src/
 -->
 
 # flexy-buffer API Documentation
@@ -208,7 +208,7 @@ reset(shrinkCapacity?: boolean): void
 ```
 
 Resets the buffer to an empty state (`size` and `position` back to `0`)
-without touching a pending housekeeping timer. Pass `shrinkCapacity: true`
+without touching the housekeeping deadline. Pass `shrinkCapacity: true`
 to also immediately reclaim capacity down to `minPages`, instead of waiting
 for the timer.
 
@@ -216,20 +216,19 @@ for the timer.
 start(): this
 ```
 
-Resets `position` and `size` to `0` **and** cancels any pending housekeeping
-timer. Use this instead of `reset()` right before writing a new message into
-a reused buffer, so a timer scheduled by an earlier grow doesn't fire (and
-shrink capacity) partway through.
+Resets `position` and `size` to `0` **and** pushes the housekeeping deadline
+out by another `houseKeepMs`. Use this instead of `reset()` right before
+writing a new message into a reused buffer, so housekeeping scheduled by an
+earlier grow can't shrink capacity partway through.
 
 ```ts
 flush(copy?: boolean): Buffer
 ```
 
 Returns the valid data (`0` to `size`), then resets the buffer (as `start()`
-does). If capacity has grown past its baseline (`minPages` pages), (re)arms
-the housekeeping timer; otherwise there's nothing to reclaim, so it clears
-any pending timer instead - a stream of small messages that never grow the
-buffer doesn't pay for a clearTimeout/setTimeout pair on every flush.
+does). If capacity has grown past its baseline (`minPages` pages), it pushes
+the housekeeping deadline out; otherwise there's nothing to reclaim, so it
+clears any pending timer instead.
 
 - `copy` (default `true`): if `true`, returns a new `Buffer` copy, safe to
   keep around indefinitely. If `false`, returns a **view** into the internal
@@ -306,11 +305,16 @@ after the position.
 
 - Capacity grows in `pageSize`-aligned chunks, up to `maxSize` (enforced at
   the exact byte, per `maxLength` above).
-- Every grow (re)arms a deferred housekeeping timer; once `houseKeepMs`
-  passes without another grow, the timer reclaims capacity - shrinking the
-  internal buffer down to `minPages` (or the current `size`, if that needs
-  more) by allocating a fresh, smaller buffer and copying the live data into
-  it.
+- Every grow, `start()` and `flush()` pushes a housekeeping deadline out to
+  `houseKeepMs` from now; once that passes with nothing touching the buffer,
+  capacity is reclaimed - the internal buffer shrinks down to `minPages` (or
+  the current `size`, if that needs more) by allocating a fresh, smaller
+  buffer and copying the live data into it.
+- Only **one** timer is ever armed, and only for a buffer that has actually
+  grown past `minPages` pages: moving the deadline is a field write, and the
+  armed timer re-arms itself for the remainder when it wakes up early. A
+  buffer in continuous use therefore allocates no timers at all after the
+  first, and one that never grows allocates none.
 - Call `reset(true)` to reclaim capacity immediately instead of waiting for
   the timer.
 - The internal buffer is allocated with `Buffer.allocUnsafe()` for

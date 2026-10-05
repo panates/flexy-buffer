@@ -16,6 +16,11 @@ concurrency:
 
 jobs:
   qc:
-    uses: panates/github-actions/.github/workflows/node-qc.yaml@v1
-    secrets:
-      PERSONAL_ACCESS_TOKEN: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
+    uses: panates/github-actions/.github/workflows/node-qc.yaml@v3
+    # On the calling job: that is what governs a reusable workflow's permissions.
+    permissions:
+      contents: read
+    with:
+      # The default is `npm run qc`, and that script is gone - lint and check are commands the
+      # preset contributes.
+      qc_script: 'rman lint && rman check'
